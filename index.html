@@ -22,7 +22,7 @@
 			});
 
 			// Open the port with desired settings
-			await port.open({ baudRate: 115200 });
+			await port.open({ baudRate: 9600 });
 
 			// Set up a reader to read data from the serial port
 			const reader = port.readable.getReader();
@@ -32,9 +32,10 @@
 				const { value, done } = await reader.read();
 				if (done) break; // Exit loop if stream is closed
 				if (value) {
+					console.log('Raw Value', value);
 					const data = textDecoder.decode(value);
 					output.textContent += data;
-					console.log(data); // Log data to the console
+					console.log('Data', data); // Log data to the console
 				}
 			}
 
