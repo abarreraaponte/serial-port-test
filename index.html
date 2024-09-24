@@ -1,0 +1,51 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Web Serial Test</title>
+</head>
+<body>
+  <button id="connect">Connect to Serial Port</button>
+  <pre id="output"></pre>
+
+  <script type="text/javascript">
+	const connectButton = document.getElementById('connect');
+	const output = document.getElementById('output');
+
+	connectButton.addEventListener('click', async () => {
+		console.log('Ports:', await navigator.serial.getPorts());
+		try {
+			// Request access to the specific port
+			const port = await navigator.serial.requestPort({
+				// Optional: Use filters if you know the USB Vendor ID and Product ID
+				// filters: [{ usbVendorId: 0xXXXX, usbProductId: 0xXXXX }]
+			});
+
+			// Open the port with desired settings
+			await port.open({ baudRate: 115200 });
+
+			// Set up a reader to read data from the serial port
+			const reader = port.readable.getReader();
+			const textDecoder = new TextDecoder();
+
+			while (true) {
+				const { value, done } = await reader.read();
+				if (done) break; // Exit loop if stream is closed
+				if (value) {
+					const data = textDecoder.decode(value);
+					output.textContent += data;
+					console.log(data); // Log data to the console
+				}
+			}
+
+			// Release the lock on the reader
+			reader.releaseLock();
+		}
+		
+		catch (error) {
+			console.error('Error:', error);
+		}
+	});
+  </script>
+</body>
+</html>
